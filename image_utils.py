@@ -1,7 +1,35 @@
 import cv2 as cv
 import numpy as np
 
+# Utils
+def get_centroid(rect):
+    """
+    Return center of rectangle.
+    :param rect: tuple(x, y, width, height).
+    :return: tuple(x, y)
+    """
+    x, y, w, h = rect
+    return (x + int(w / 2), y + int(h / 2))
 
+def create_mask(size, polygon):
+    mask = np.zeros(size, dtype=np.uint8)
+    cv.fillPoly(mask, polygon, (255,))
+    return mask
+
+def check_masks(masks, point):
+    """
+    Check that point is located inside at least one mask from masks.
+    :param masks: numpy array - mask.
+    :param point: tuple(x, y)
+    :return: boolean
+    """
+    for mask in masks:
+        if mask[point[1]][point[0]] == 255:
+            return True
+
+    return False
+
+# Adjusters frames
 def resize(frame, size):
     """
     Resize image.
@@ -46,28 +74,7 @@ class MorphologyExecutor(object):
 
         return filtering
 
-def get_centroid(rect):
-    """
-    Return center of rectangle.
-    :param rect: tuple(x, y, width, height).
-    :return: tuple(x, y)
-    """
-    x, y, w, h = rect
-    return (x + int(w / 2), y + int(h / 2))
-
-def check_masks(masks, point):
-    """
-    Check that point is located inside at least one mask from masks.
-    :param masks: numpy array - mask.
-    :param point: tuple(x, y)
-    :return: boolean
-    """
-    for mask in masks:
-        if mask[point[1]][point[0]] == 255:
-            return True
-
-    return False
-
+# Frame processors
 def find_contours(frame, filter, non_masks):
     """
     Find contours which correspond filter and isn`t located inside masks.
